@@ -6,6 +6,8 @@ import (
 	"os"
 	"testing"
 
+	"k8s.io/apimachinery/pkg/types"
+
 	"github.com/google/uuid"
 
 	corev1 "k8s.io/api/core/v1"
@@ -38,11 +40,11 @@ func TestMain(m *testing.M) {
 	exitCode = m.Run()
 }
 
-func newFleet(name, namespace string, gsSpec *agonesv1.GameServerSpec) *agonesv1.Fleet {
+func newFleet(name, namespace string, replicas int, gsSpec *agonesv1.GameServerSpec) *agonesv1.Fleet {
 	return &agonesv1.Fleet{
 		ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: namespace},
 		Spec: agonesv1.FleetSpec{
-			Replicas: 1,
+			Replicas: int32(replicas),
 			Template: agonesv1.GameServerTemplateSpec{
 				Spec: *gsSpec,
 			},
@@ -50,10 +52,10 @@ func newFleet(name, namespace string, gsSpec *agonesv1.GameServerSpec) *agonesv1
 	}
 }
 
-func createFleet(name, namespace string, gsSpec *agonesv1.GameServerSpec) *agonesv1.Fleet {
+func createFleet(name, namespace string, replicas int, gsSpec *agonesv1.GameServerSpec) *agonesv1.Fleet {
 	flt, err := framework.AgonesClient.AgonesV1().
 		Fleets(namespace).
-		Create(newFleet(name, namespace, gsSpec))
+		Create(newFleet(name, namespace, replicas, gsSpec))
 	if err != nil {
 		panic(err)
 	}
@@ -89,4 +91,12 @@ func newRandomNamespace(t *testing.T) string {
 		_ = framework.DeleteNamespace(namespace)
 	})
 	return namespace
+}
+
+func updateContainerImage(flt *agonesv1.Fleet, image string) error {
+	patch := fmt.Sprintf(`[{"op": "replace", "path": "/spec/template/spec/template/spec/containers/0/image", "value": "%s"}]`, "gameserver:v2")
+	if _, err := framework.AgonesClient.AgonesV1().Fleets(flt.Namespace).Patch(flt.Name, types.JSONPatchType, []byte(patch)); err != nil {
+		return err
+	}
+	return nil
 }

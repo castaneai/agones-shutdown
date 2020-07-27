@@ -9,3 +9,9 @@ minikube start
 make build-image
 go test ./...
 ```
+
+You can see gameserver logs with the following command:
+
+```
+stern fleet -E sidecar --all-namespaces
+```
