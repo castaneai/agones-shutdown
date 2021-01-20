@@ -1,4 +1,4 @@
-FROM golang:alpine AS builder
+FROM golang:alpine3.12 AS builder
 ARG VERSION
 RUN apk add --no-cache git
 WORKDIR /go/src/gameserver

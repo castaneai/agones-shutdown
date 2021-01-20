@@ -1,17 +1,15 @@
 # agones-shutdown example
 
-## Testing
+## Requirements
 
-Using [minikube](https://agones.dev/site/docs/installation/creating-cluster/minikube/)
+- minikube
+- helm
+- skaffold
 
-```
-minikube start
-make build-image
-go test ./...
-```
-
-You can see gameserver logs with the following command:
+## Run fleet
 
 ```
-stern fleet -E sidecar --all-namespaces
+make up
+make run
 ```
+

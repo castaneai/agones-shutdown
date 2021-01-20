@@ -18,7 +18,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	agones, err := setupAgones(ctx)
+	_, err := setupAgones(ctx)
 	if err != nil {
 		log.Fatalf("failed to setup agones SDK: %+v", err)
 	}
@@ -27,9 +27,6 @@ func main() {
 	signal.Notify(sigCh, syscall.SIGTERM, syscall.SIGINT)
 	sig := <-sigCh
 	log.Printf("Signal received: %+v", sig)
-	if err := agones.Shutdown(); err != nil {
-		log.Fatalf("failed to send shutdown to agones SDK: %+v", err)
-	}
 }
 
 func setupAgones(ctx context.Context) (*sdk.SDK, error) {
